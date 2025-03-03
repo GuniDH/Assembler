@@ -84,7 +84,7 @@ END:     stop
 
 ### 1. Clone the Repository
 ```sh
-git clone https://github.com/yourusername/custom-assembler.git
+git clone https://github.com/GuniDH/Assembler.git
 cd custom-assembler
 ```
 
