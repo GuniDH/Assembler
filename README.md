@@ -85,7 +85,7 @@ END:     stop
 ### 1. Clone the Repository
 ```sh
 git clone https://github.com/GuniDH/Assembler.git
-cd custom-assembler
+cd Assembler
 ```
 
 ### 2. Compile the Assembler
