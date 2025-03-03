@@ -95,7 +95,7 @@ gcc -o assembler main.c assembler.c first_pass.c -Wall
 
 ### 3. Run the Assembler
 ```sh
-./assembler input.as
+./assembler Inputs/input1.as
 ```
 This will process `input.as` and generate the corresponding machine code output.
 
