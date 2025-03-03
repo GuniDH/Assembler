@@ -4,7 +4,7 @@
 /*
 
 	Assembler program
-	Authors: Guni Dio Hannes (id 215615519) and Amir Lavi (id 328334966)
+	Author: Guni
 
 */
 
