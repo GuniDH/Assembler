@@ -2,160 +2,111 @@
 
 ## Overview
 
-This project is a **custom assembler** designed to translate a **hypothetical assembly language** into machine code. It follows a **two-pass assembly process**, ensuring proper handling of labels, instructions, and directives. This assembler is designed for a custom **16-bit architecture**, meaning that all instructions, registers, and memory operations adhere to this framework. The assembler converts assembly files (`.as`) into binary output that can be loaded into an emulator or used directly in hardware simulation environments.
+This project is a **custom assembler** for a **hypothetical 16-bit computer architecture**. It translates assembly language source files (`.as`) into machine code. The assembler follows a **two-pass assembly process**, ensuring correct resolution of labels, symbols, and memory references. 
+
+The target machine has **8 general-purpose registers**, a **256-word memory**, and a **stack**. Instructions are encoded in a structured format, supporting multiple addressing modes.
 
 ## Features
 
-- **Custom Assembly Language**: Implements a structured instruction set for arithmetic, branching, and memory operations.
-- **Two-Pass Assembler**: First pass resolves labels and symbols, second pass generates machine code.
-- **Symbol Table Management**: Handles labels, variables, and memory addressing.
-- **Instruction Parsing**: Supports various directives and operations for a complete assembly workflow.
-- **Error Handling**: Detects and reports syntax errors, undefined labels, and incorrect instructions.
-- **File Input and Output**: Reads `.as` assembly files and generates corresponding machine code output.
+- **Two-Pass Assembler**: First pass resolves symbols and labels; second pass generates machine code.
+- **Instruction Set Implementation**: Handles various operations including arithmetic, logic, control flow, and I/O.
+- **Symbol Table Management**: Supports `.entry` and `.extern` directives for linking.
+- **Error Detection**: Identifies syntax errors, missing labels, incorrect addressing modes, and more.
+- **File Processing**: Reads `.as` assembly files and outputs machine code for execution.
 
 ## Instruction Set
 
-The assembler supports a range of operations categorized as follows:
+The assembler supports the following instructions, each mapped to a specific opcode:
 
-### **General Information About the Assembly Language**
+### **1. Data Movement Instructions**
+- `mov src, dest` - Moves data from `src` to `dest`.
+- `lea label, reg` - Loads the address of `label` into `reg`.
+- `not reg` - Performs bitwise NOT on `reg`.
+- `clr reg` - Clears the value of `reg` (sets it to zero).
 
-This assembler works with a **16-bit word size** and a **fixed instruction format**. The instruction encoding follows this structure:
+### **2. Arithmetic Instructions**
+- `add src, dest` - Adds `src` to `dest`.
+- `sub src, dest` - Subtracts `src` from `dest`.
+- `inc reg` - Increments `reg` by 1.
+- `dec reg` - Decrements `reg` by 1.
 
-| Bit Position | Description                                       |
-| ------------ | ------------------------------------------------- |
-| 0-3          | Opcode (instruction type)                         |
-| 4-7          | Source Register (if applicable)                   |
-| 8-11         | Destination Register (if applicable)              |
-| 12-15        | Immediate Value or Memory Address (if applicable) |
+### **3. Control Flow Instructions**
+- `jmp label` - Unconditional jump to `label`.
+- `bne label` - Branch if the last comparison was not equal.
+- `jsr label` - Jumps to a subroutine at `label`.
+- `rts` - Returns from a subroutine.
+- `stop` - Halts execution.
 
-Each instruction fits within this structure, and specific operations determine how bits are interpreted.
+### **4. Input/Output Instructions**
+- `red reg` - Reads an integer from the user into `reg`.
+- `prn operand` - Prints `operand` to the output.
 
-### **1. Arithmetic Operations**
+## Addressing Modes
 
-- `ADD R1, R2` – Adds contents of `R1` and `R2`, storing result in `R1`.
-- `SUB R1, R2` – Subtracts `R2` from `R1`.
+Each instruction can use different **addressing modes**:
 
-### **2. Data Movement**
+| Mode         | Syntax       | Description |
+|-------------|-------------|-------------|
+| Immediate   | `#value`    | Uses a constant value (e.g., `mov #5, r1`) |
+| Direct      | `label`     | Uses a memory location (e.g., `mov x, r2`) |
+| Indexed     | `label[i]`  | Uses an address offset by `i` |
+| Register    | `rX`        | Uses a register (e.g., `mov r1, r2`) |
 
-- `MOV R1, R2` – Copies data from `R2` to `R1`.
-- `LOAD R1, LABEL` – Loads value from memory address of `LABEL` into `R1`.
-- `STORE R1, LABEL` – Stores value from `R1` into memory address of `LABEL`.
+## Assembly Directives
 
-### **3. Branching & Control Flow**
+- `.data value1, value2, ...` - Defines a list of numeric values in memory.
+- `.string "text"` - Stores a string in memory.
+- `.entry label` - Marks `label` as accessible from outside.
+- `.extern label` - Declares `label` as an external symbol.
 
-- `JMP LABEL` – Jumps to the given label.
-- `BNE R1, R2, LABEL` – Branches to `LABEL` if `R1 != R2`.
-- `BEQ R1, R2, LABEL` – Branches to `LABEL` if `R1 == R2`.
+## Example Assembly Code
 
-### **4. Directives**
+```assembly
+.data 10, 20, 30
+.string "Hello"
+.extern EXTERNAL_LABEL
+.entry MAIN
 
-- `.data VALUE` – Defines memory space initialized with `VALUE`.
-- `.string "TEXT"` – Stores a string in memory.
-- `.extern SYMBOL` – Declares an external symbol.
-- `.entry SYMBOL` – Marks `SYMBOL` as an entry point.
+MAIN:    mov r3, r2
+         add #5, r1
+         jmp END
+
+END:     stop
+```
 
 ## Technologies Used
 
-- **C Language** (for assembler implementation)
-- **File I/O Operations** (for reading/writing assembly and machine code files)
-- **Data Structures** (for managing symbol tables and instruction sets)
-
-## Project Structure
-
-```
-Assembler_Project/
-│── assembler.c
-│── main.c
-│── first_pass.c
-│── cell_operations.c
-│── header.h
-│── input1.as
-│── input2.as
-│── input3.as
-│── input4.as
-│── input_output_example.png
-```
-
-## Prerequisites
-
-Ensure you have the following installed:
-
-- **C Compiler** (GCC/Clang)
-- **Make** (if using a Makefile for compilation)
+- **C Language** for assembler implementation
+- **File I/O Operations** for reading/writing assembly and machine code
+- **Data Structures** for managing symbol tables and instruction parsing
 
 ## Installation & Usage
 
 ### 1. Clone the Repository
-
 ```sh
 git clone https://github.com/yourusername/custom-assembler.git
 cd custom-assembler
 ```
 
-### 2. Compile the Project
-
+### 2. Compile the Assembler
 ```sh
-gcc -o assembler main.c assembler.c first_pass.c cell_operations.c -Wall
+gcc -o assembler main.c assembler.c first_pass.c -Wall
 ```
 
 ### 3. Run the Assembler
-
 ```sh
-./assembler input1.as
+./assembler input.as
 ```
-
-This will process `input1.as` and generate the corresponding machine code output.
-
-## Example Input/Output
-
-### **Example Assembly Code (`example.as`)**
-
-```assembly
-.data 10
-.string "Hello"
-MOV R1, 5
-MOV R2, R1
-ADD R2, 10
-STORE R2, RESULT
-JMP END
-LABEL: SUB R2, 1
-BEQ R2, 0, END
-END: HALT
-```
-
-### **Expected Machine Code Output**
-
-Each instruction is converted into a **16-bit binary representation**. Example:
-
-```
-0001 0001 0101 0000  # MOV R1, 5
-0001 0010 0001 0000  # MOV R2, R1
-0010 0010 1010 0000  # ADD R2, 10
-0100 0010 1100 0000  # STORE R2, RESULT
-1000 0000 0000 0111  # JMP END
-...
-1111 0000 0000 0000  # HALT
-```
+This will process `input.as` and generate the corresponding machine code output.
 
 ## Error Handling
 
-The assembler implements **detailed error detection** to ensure correct assembly. Common errors include:
+The assembler reports errors with precise **line numbers and descriptions**:
 
-### **1. Syntax Errors**
-
-- Invalid instructions (`XYZ R1, R2` → Unknown opcode `XYZ`)
-- Missing operands (`ADD R1` → Expected `ADD R1, R2`)
-- Incorrect addressing mode (`LOAD 5, R1` → Invalid operand order)
-
-### **2. Undefined Labels & Symbols**
-
-- Using labels before defining them (`JMP UNDEFINED_LABEL`)
-- Forgetting to declare `.extern` or `.entry` symbols
-
-### **3. Memory Errors**
-
-- Accessing out-of-bounds memory locations
-- Stack overflow/underflow detection in `PUSH` and `POP` instructions
+- **Syntax Errors**: Invalid instructions, missing operands.
+- **Undefined Labels**: Jumping to a non-existent label.
+- **Memory Violations**: Using an out-of-bounds address.
+- **Invalid Addressing Modes**: Using unsupported operand types.
 
 ## Contributions
 
@@ -166,7 +117,7 @@ Contributions are welcome! Submit issues and pull requests to improve functional
 This project is licensed under the **MIT License**.
 
 ---
-
 ### Author
-
 **Guni**  
+
+
