@@ -1,123 +1,123 @@
 # Custom Assembler Project by Guni
 
-## Overview
+## Project Overview
+This project implements an assembler for a simple assembly language. The assembler translates assembly language code into machine code for a hypothetical computer.
 
-This project is a **custom assembler** for a **hypothetical 16-bit computer architecture**. It translates assembly language source files (`.as`) into machine code. The assembler follows a **two-pass assembly process**, ensuring correct resolution of labels, symbols, and memory references. 
+## The Assembly Language and Computer Model
 
-The target machine has **8 general-purpose registers**, a **256-word memory**, and a **stack**. Instructions are encoded in a structured format, supporting multiple addressing modes.
+### Computer Hardware
+The computer in this project is composed of:
+- **CPU** (Central Processing Unit)
+- **8 Registers**: r0, r1, r2, r3, r4, r5, r6, r7
+  - Each register is 14 bits wide
+- **Memory**: 256 cells (addresses 0-255)
+  - Each memory cell is 14 bits wide, also called a "word"
 
-## Features
+## Assembler Operation
 
-- **Two-Pass Assembler**: First pass resolves symbols and labels; second pass generates machine code.
-- **Instruction Set Implementation**: Handles various operations including arithmetic, logic, control flow, and I/O.
-- **Symbol Table Management**: Supports `.entry` and `.extern` directives for linking.
-- **Error Detection**: Identifies syntax errors, missing labels, incorrect addressing modes, and more.
-- **File Processing**: Reads `.as` assembly files and outputs machine code for execution.
+The assembler processes the assembly language in two passes and pre-assembler:
+1.Pre-assember pass to withdraw macros
+1. First pass: Collects information about labels and their addresses and translate most instructions to the machine code
+2. Second pass: Translates the rest (Labels which are macros, or labels that were defined after hte instruction)
+
+The assembler generates output files with the machine code representation of the program - object file, entries and externs.
+
+## Instruction Format
+
+Each instruction is encoded in a memory word (14 bits) with the following structure:
+
+| Bits 0-1 | Bit 2 | Bit 3 | Bits 4-5 | Bits 6-9 | Bits 10-13 |
+|----------|-------|-------|----------|----------|------------|
+| E,R,A    | Destination register | Source register | Opcode | Parameter 1 | Parameter 2 |
+
+- **A,R,E bits (0-1)** indicate addressing mode:
+  - A (bit 0): Absolute addressing (value 0)
+  - R (bit 1): External addressing (value 1)
+  - E (bit 2): Relocatable addressing (value 2)
+- **Bits 2-3** define the destination operand address
+- **Bits 4-5** define the source operand address
+- **Bits 6-9** contain the opcode
+- **Bits 10-13** are used for parameters when needed
 
 ## Instruction Set
 
-The assembler supports the following instructions, each mapped to a specific opcode:
+The assembler supports 16 operation codes (opcodes):
 
-### **1. Data Movement Instructions**
-- `mov src, dest` - Moves data from `src` to `dest`.
-- `lea label, reg` - Loads the address of `label` into `reg`.
-- `not reg` - Performs bitwise NOT on `reg`.
-- `clr reg` - Clears the value of `reg` (sets it to zero).
+| Opcode (decimal) | Instruction | Description |
+|------------------|-------------|-------------|
+| 0 | mov | Move - Copies content from source to destination |
+| 1 | cmp | Compare - Compares values between two operands |
+| 2 | add | Add - Adds source to destination |
+| 3 | sub | Subtract - Subtracts source from destination |
+| 4 | not | Not - Logical NOT operation |
+| 5 | clr | Clear - Sets operand to zero |
+| 6 | lea | Load Effective Address - Loads address into register |
+| 7 | inc | Increment - Increases operand by 1 |
+| 8 | dec | Decrement - Decreases operand by 1 |
+| 9 | jmp | Jump - Unconditional jump to address |
+| 10 | bne | Branch if Not Equal - Jump if result is not zero |
+| 11 | red | Read - Reads input from standard input |
+| 12 | prn | Print - Prints operand to standard output |
+| 13 | jsr | Jump to Subroutine - Jumps to subroutine |
+| 14 | rts | Return from Subroutine - Returns from subroutine |
+| 15 | stop | Stop - Terminates program execution |
 
-### **2. Arithmetic Instructions**
-- `add src, dest` - Adds `src` to `dest`.
-- `sub src, dest` - Subtracts `src` from `dest`.
-- `inc reg` - Increments `reg` by 1.
-- `dec reg` - Decrements `reg` by 1.
+## Instruction Categories
 
-### **3. Control Flow Instructions**
-- `jmp label` - Unconditional jump to `label`.
-- `bne label` - Branch if the last comparison was not equal.
-- `jsr label` - Jumps to a subroutine at `label`.
-- `rts` - Returns from a subroutine.
-- `stop` - Halts execution.
+Instructions are divided into three categories:
 
-### **4. Input/Output Instructions**
-- `red reg` - Reads an integer from the user into `reg`.
-- `prn operand` - Prints `operand` to the output.
+1. **First Category**: mov, cmp, add, sub, lea
+2. **Second Category**: not, clr, inc, dec, jmp, bne, jsr
+3. **Third Category**: rts, stop
 
 ## Addressing Modes
 
-Each instruction can use different **addressing modes**:
+The following addressing modes are supported:
 
-| Mode         | Syntax       | Description |
-|-------------|-------------|-------------|
-| Immediate   | `#value`    | Uses a constant value (e.g., `mov #5, r1`) |
-| Direct      | `label`     | Uses a memory location (e.g., `mov x, r2`) |
-| Indexed     | `label[i]`  | Uses an address offset by `i` |
-| Register    | `rX`        | Uses a register (e.g., `mov r1, r2`) |
+1. **Immediate Addressing** (#):
+   - Example: `mov #-1, r1` - Move the value -1 to register r1
 
-## Assembly Directives
+2. **Direct Addressing**:
+   - Example: `mov HELLO, r1` - Move the content from memory location HELLO to register r1
 
-- `.data value1, value2, ...` - Defines a list of numeric values in memory.
-- `.string "text"` - Stores a string in memory.
-- `.entry label` - Marks `label` as accessible from outside.
-- `.extern label` - Declares `label` as an external symbol.
+3. **Register Addressing**:
+   - Example: `mov r1, r2` - Move the content of register r1 to register r2
 
-## Example Assembly Code
+4. **Jump Instructions**:
+   - Standard: `jmp LINE` - Jump to the label LINE
+   - With parameters: `jmp LINE(r6-6, r4)` - Jump with register parameters
 
-```assembly
-.data 10, 20, 30
-.string "Hello"
-.extern EXTERNAL_LABEL
-.entry MAIN
+5. **Subroutine Operations**:
+   - Call: `jsr FUNC` - Jump to subroutine FUNC
+   - Call with parameters: `jsr FUNC(#75, X)` - Call with immediate and label parameters
+   - Return: `rts` - Return from subroutine
 
-MAIN:    mov r3, r2
-         add #5, r1
-         jmp END
+## Examples of Assembly Instructions
 
-END:     stop
 ```
+; Register operations
+mov r1, r2     ; Move content from r1 to r2
+cmp r2, r1     ; Compare r2 with r1
 
-## Technologies Used
+; Immediate value operations
+mov #-1, r1    ; Move the value -1 to r1
+cmp #5, r2     ; Compare 5 with the content of r2
 
-- **C Language** for assembler implementation
-- **File I/O Operations** for reading/writing assembly and machine code
-- **Data Structures** for managing symbol tables and instruction parsing
+; Memory operations
+lea HELLO, r1  ; Load the address of HELLO into r1
+mov X, r1      ; Move the content from memory location X to r1
 
-## Installation & Usage
+; Jump operations
+jmp LINE       ; Jump to LINE
+jmp LINE(r6-6,r4) ; Jump with calculation using registers
+bne LINE       ; Branch to LINE if result is not zero
+bne LINE(X,r4) ; Branch with parameters
 
-### 1. Clone the Repository
-```sh
-git clone https://github.com/GuniDH/Assembler.git
-cd Assembler
+; Subroutine operations
+jsr FUNC       ; Jump to subroutine FUNC
+jsr FUNC(#75,X) ; Jump to subroutine with parameters
+rts            ; Return from subroutine
+
+; System operations
+stop           ; Stop program execution
 ```
-
-### 2. Compile the Assembler
-```sh
-gcc -o assembler main.c assembler.c first_pass.c -Wall
-```
-
-### 3. Run the Assembler
-```sh
-./assembler Inputs/input1.as
-```
-This will process `input.as` and generate the corresponding machine code output.
-
-## Error Handling
-
-The assembler reports errors with precise **line numbers and descriptions**:
-
-- **Syntax Errors**: Invalid instructions, missing operands.
-- **Undefined Labels**: Jumping to a non-existent label.
-- **Memory Violations**: Using an out-of-bounds address.
-- **Invalid Addressing Modes**: Using unsupported operand types.
-
-## Contributions
-
-Contributions are welcome! Submit issues and pull requests to improve functionality or add new features.
-
-## License
-
-This project is licensed under the **MIT License**.
-
----
-### Author
-**Guni**  
-
-
