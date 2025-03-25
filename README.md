@@ -1,4 +1,4 @@
-# Custom Assembler Project by Guni
+# Custom Assembler Project by Guni. Date: 15.2.23
 
 ## Project Overview
 This project implements an assembler for a simple assembly language. The assembler translates assembly language code into machine code for a hypothetical computer.
