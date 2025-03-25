@@ -1,1 +1,15 @@
-Inputs/
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Executables
+*.exe
+*.out
+*.app
+my_assembler
+
+# Debug files
+*.dSYM/
+*.su
